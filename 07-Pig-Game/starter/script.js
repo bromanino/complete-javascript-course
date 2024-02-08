@@ -12,34 +12,81 @@ const buttonNew = document.querySelector('.btn--new');
 const buttonRoll = document.querySelector('.btn--roll');
 const buttonHold = document.querySelector('.btn--hold');
 
+// Declaring variables
+let currentScore, activePlayer, playing, scores;
+
 // Starting conditions
-scorePlayerOne.textContent = 0;
-scorePlayerTwo.textContent = 0;
-dice.classList.add('hidden');
-let currentScore = 0;
-let activePlayer = 0;
-const scores = [0, 0];
+const init = function () {
+  currentScore = 0;
+  activePlayer = 0;
+  playing = true;
+  scores = [0, 0];
+
+  scorePlayerOne.textContent = 0;
+  scorePlayerTwo.textContent = 0;
+  currentScorePlayerOne.textContent = 0;
+  currentScorePlayerTwo.textContent = 0;
+  
+  dice.classList.add('hidden');
+  const winner = document.querySelector('.player--winner');
+  if (winner) winner.classList.remove('player--winner');
+  playerOne.classList.add('player--active')
+};
+init();
 
 // Rolling dice functionality
 buttonRoll.addEventListener('click', function () {
-  // 1. Generate random dice roll
-  const diceRoll = Math.trunc(Math.random() * 6) + 1;
-  console.log(diceRoll);
-  // 2. Display dice roll
-  dice.classList.remove('hidden');
-  dice.src = `dice-${diceRoll}.png`;
-  // 3. Is it a 1? If false, add dice to current score
-  if (diceRoll !== 1) {
-    currentScore += diceRoll;
-    document.getElementById(`current--${activePlayer}`).textContent =
-      currentScore;
-    //3. Is it a 1? If true, swtich to next player
-  } else {
-    currentScore = 0;
-    document.getElementById(`current--${activePlayer}`).textContent =
-      currentScore;
-    activePlayer = activePlayer === 0 ? 1 : 0;
-    playerOne.classList.toggle('.player--active');
-    playerTwo.classList.toggle('.player--active');
+  if (playing) {
+    // 1. Generate random dice roll
+    const diceRoll = Math.trunc(Math.random() * 6) + 1;
+    // 2. Display dice roll
+    dice.classList.remove('hidden');
+    dice.src = `dice-${diceRoll}.png`;
+    // 3. Is it a 1? If false, add dice to current score and display new score
+    if (diceRoll !== 1) {
+      currentScore += diceRoll;
+      document.getElementById(`current--${activePlayer}`).textContent =
+        currentScore;
+      //3. Is it a 1? If true, swtich to next player
+    } else {
+      switchPlayer();
+    }
   }
 });
+
+// Holding score functionality
+buttonHold.addEventListener('click', function () {
+  if (playing) {
+    // 1. Add current score to active player's score
+    scores[activePlayer] += currentScore;
+    document.getElementById(`score--${activePlayer}`).textContent =
+      scores[activePlayer];
+    // 2. Player won if score is 30 or more
+    if (scores[activePlayer] >= 30) {
+      playing = false;
+      dice.classList.add('hidden');
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.add('player--winner');
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.remove('player--active');
+    } else {
+      switchPlayer();
+    }
+  }
+});
+
+// Resetting the game
+buttonNew.addEventListener('click', init);
+
+// Switching between players
+function switchPlayer() {
+  currentScore = 0;
+  document.getElementById(`current--${activePlayer}`).textContent =
+    currentScore;
+    console.log("amend")
+  activePlayer = activePlayer === 0 ? 1 : 0;
+  playerOne.classList.toggle('player--active');
+  playerTwo.classList.toggle('player--active');
+}
